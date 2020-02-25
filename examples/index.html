@@ -1,0 +1,11 @@
+<html>
+  <head> </head>
+  <body>
+    <div id="albums"></div>
+    <script src="../dist/spotify-wrapper.umd.js"></script>
+    <script>
+      const albums = SpotifyWrapper.search("tiesto", "artist");
+      console.log(albums);
+    </script>
+  </body>
+</html>
