@@ -1,19 +1,12 @@
-import { toJson } from "./utils";
-import { API_URL, HEADER } from "./config";
+function searcher(type, query) {
+  return this.request(`${this.apiURL}search?q=${query}&type=${type}`);
+}
 
-export const search = (query, type) => {
-  return fetch(`${API_URL}search?q=${query}&type=${type}`, HEADER).then(toJson);
-};
-export const searchArtists = query => {
-  search(query, "artist");
-};
-export const searchAlbums = query => {
-  search(query, "albums");
-};
-
-export const searchTracks = query => {
-  search(query, "track");
-};
-export const searchPlaylists = query => {
-  search(query, "playlists");
-};
+export default function search() {
+  return {
+    searchArtists: searcher.bind(this, "artists"),
+    searchAlbums: searcher.bind(this, "albums"),
+    searchTracks: searcher.bind(this, "track"),
+    searchPlaylists: searcher.bind(this, "playlists")
+  };
+}

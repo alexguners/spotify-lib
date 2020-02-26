@@ -4,8 +4,9 @@
     <div id="albums"></div>
     <script src="../dist/spotify-wrapper.umd.js"></script>
     <script>
-      const albums = SpotifyWrapper.search("tiesto", "artist");
-      console.log(albums);
+      const spotify = new SpotifyWrapper({ token: "xxx" });
+
+      console.log(spotify.search.searchAlbums("tiesto"));
     </script>
   </body>
 </html>

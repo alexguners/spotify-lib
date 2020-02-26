@@ -2,158 +2,124 @@ import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
 import sinonChai from "sinon-chai";
+
+import { API_URL } from "../src/config";
+import SpotifyWrapper from "../src/index";
+
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 global.fetch = require("node-fetch");
-import {
-  search,
-  searchAlbums,
-  searchArtists,
-  searchTracks,
-  searchPlaylists
-} from "../src/index";
 
 describe("Spotify Wrapper", () => {
   let fetchedStub;
   let promise;
+  let spotify;
   beforeEach(() => {
     fetchedStub = sinon.stub(global, "fetch");
     promise = fetchedStub.resolves({ json: () => ({ body: "json" }) });
+    spotify = new SpotifyWrapper({ apiURL: API_URL, token: "xxx" });
   });
 
   afterEach(() => {
     fetchedStub.restore();
   });
   describe("smoke tests", () => {
-    it("should exist search method", () => {
-      expect(search).to.exist;
-    });
-
     it("should exist searchAlbums method", () => {
-      expect(searchAlbums).to.exist;
+      expect(spotify.search.searchAlbums).to.exist;
     });
 
     it("should exist searchArtists method", () => {
-      expect(searchArtists).to.exist;
+      expect(spotify.search.searchArtists).to.exist;
     });
 
     it("should exist searchTracks method", () => {
-      expect(searchTracks).to.exist;
+      expect(spotify.search.searchTracks).to.exist;
     });
 
     it("should exist searchPlaylists method", () => {
-      expect(searchPlaylists).to.exist;
-    });
-  });
-
-  describe("Generic Search", () => {
-    it("should call fetch function", () => {
-      const artists = search();
-      expect(fetchedStub).to.have.calledOnce;
-      fetchedStub.restore();
-    });
-
-    it("should called with the correct URL", () => {
-      context("passing one type", () => {
-        const artists = search("incubus", "artist");
-        expect(fetchedStub).to.have.been.calledWith(
-          "https://api.spotify.com/v1/search?q=incubus&type=artist"
-        );
-
-        const album = search("incubus", "album");
-        expect(fetchedStub).to.have.been.calledWith(
-          "https://api.spotify.com/v1/search?q=incubus&type=album"
-        );
-      });
-
-      context("passing two types", () => {
-        const albums = search("incubus", ["artist", "album"]);
-
-        expect(fetchedStub).to.have.been.calledWith(
-          "https://api.spotify.com/v1/search?q=incubus&type=artist,album"
-        );
-      });
-    });
-
-    it("should return a Json data from Promise", () => {
-      const artists = search("incubus", "artist");
-
-      return expect(artists).to.eventually.eql({ body: "json" });
+      expect(spotify.search.searchPlaylists).to.exist;
     });
   });
 
   describe("Search Artists", () => {
     it("should call fetch function", () => {
-      const artist = searchArtists("Incubus");
+      const artist = spotify.search.searchArtists("Incubus");
       expect(fetchedStub).to.have.be.calledOnce;
     });
 
     it("should return the correct URL", () => {
-      const artists = searchArtists("incubus");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=incubus&type=artist"
+      const artists = spotify.search.searchArtists("incubus");
+      const headers = {
+        headers: {
+          Authorization: `'Bearer xxx'`
+        }
+      };
+
+      expect(fetchedStub).to.have.be.calledWith(
+        `${API_URL}search?q=incubus&type=artists`
       );
 
-      const artist2 = searchArtists("Tiesto");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=incubus&type=artist"
+      const artist2 = spotify.search.searchArtists("Tiesto");
+      expect(fetchedStub).to.have.be.calledWith(
+        `${API_URL}search?q=Tiesto&type=artists`
       );
     });
   });
 
   describe("Search Albums", () => {
     it("should call fetch function", () => {
-      const albums = searchAlbums("incubus");
+      const albums = spotify.search.searchAlbums("incubus");
+
       expect(fetchedStub).to.have.be.calledOnce;
     });
 
     it("should return the correct URL", () => {
-      const artists = searchAlbums("incubus");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=incubus&type=albums"
+      const artists = spotify.search.searchAlbums("incubus");
+      expect(fetchedStub).to.have.be.calledWith(
+        `${API_URL}search?q=incubus&type=albums`
       );
 
-      const artists2 = searchAlbums("tiesto");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=tiesto&type=albums"
+      const artists2 = spotify.search.searchAlbums("tiesto");
+      expect(fetchedStub).to.have.be.calledWith(
+        `${API_URL}search?q=tiesto&type=albums`
       );
     });
   });
 
   describe("Search Track", () => {
     it("should call fetch function", () => {
-      const track = searchAlbums("incubus");
+      const track = spotify.search.searchAlbums("incubus");
       expect(fetchedStub).to.have.be.calledOnce;
     });
 
     it("should return the correct URL", () => {
-      const artists = searchTracks("incubus");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=incubus&type=track"
+      const artists = spotify.search.searchTracks("incubus");
+      expect(fetchedStub).to.have.calledWith(
+        `${API_URL}search?q=incubus&type=track`
       );
 
-      const artists2 = searchTracks("tiesto");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=tiesto&type=track"
+      const artists2 = spotify.search.searchTracks("tiesto");
+      expect(fetchedStub).to.have.calledWith(
+        `${API_URL}search?q=tiesto&type=track`
       );
     });
   });
 
   describe("Search Playlist", () => {
     it("should call fetch function", () => {
-      const playlist = searchAlbums("incubus");
+      const playlist = spotify.search.searchAlbums("incubus");
       expect(fetchedStub).to.have.be.calledOnce;
     });
 
     it("should return the correct URL", () => {
-      const playlists = searchPlaylists("incubus");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=incubus&type=playlists"
+      const playlists = spotify.search.searchPlaylists("incubus");
+      expect(fetchedStub).to.have.calledWith(
+        `${API_URL}search?q=incubus&type=playlists`
       );
 
-      const playlists2 = searchPlaylists("tiesto");
-      expect(fetchedStub).to.have.been.calledWith(
-        "https://api.spotify.com/v1/search?q=tiesto&type=playlists"
+      const playlists2 = spotify.search.searchPlaylists("tiesto");
+      expect(fetchedStub).to.have.calledWith(
+        `${API_URL}search?q=tiesto&type=playlists`
       );
     });
   });
